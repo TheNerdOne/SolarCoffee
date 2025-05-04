@@ -1,11 +1,13 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using SolarCoffee.Data;
+using SolarCoffee.Services.Product;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddSwaggerGen(options =>
 {
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
