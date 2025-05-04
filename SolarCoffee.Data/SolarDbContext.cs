@@ -10,6 +10,19 @@ namespace SolarCoffee.Data
 
         public SolarDbContext(DbContextOptions options) : base(options) { }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.CreatedOn)
+                .HasConversion<DateTime>();
+            modelBuilder.Entity<Customer>()
+                .HasOne(c => c.PrimaryAddress)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<CustomerAddress> CustomerAddresses { get; set; }
         public virtual DbSet<Product> Products { get; set; }
@@ -19,4 +32,4 @@ namespace SolarCoffee.Data
         public virtual DbSet<SalesOrderItem> SalesOrderItems { get; set; }
 
     }
-} 
+}
