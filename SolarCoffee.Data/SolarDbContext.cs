@@ -8,7 +8,7 @@ namespace SolarCoffee.Data
     {
         public SolarDbContext() { }
 
-        public SolarDbContext(DbContextOptions options) : base(options) { }
+        public SolarDbContext(DbContextOptions<SolarDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,11 @@ namespace SolarCoffee.Data
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            // Make sure to replace the connection string with your actual database connection string
+            options.UseNpgsql("Host=localhost;Port=5432;Username=poooriiich;Password=poria123;Database=solarcoffee;");
+        }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<CustomerAddress> CustomerAddresses { get; set; }
         public virtual DbSet<Product> Products { get; set; }
