@@ -11,7 +11,7 @@ namespace SolarCoffee.Services.Product
         Data.Models.Product GetProductById(int id);
         ServiceResponse<bool> CreateProduct(Data.Models.Product product);
         ServiceResponse<bool> ArchiveProduct(int id);
-
+        ServiceResponse<bool> UpdateProduct(Data.Models.Product product);
 
     }
 }
