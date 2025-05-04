@@ -53,12 +53,15 @@ namespace SolarCoffee.Web.Controllers
             {
                 return BadRequest("Product ID mismatch");
             }
-            var response = _productService.CreateProduct(product);
+            var response = _productService.UpdateProduct(product);
             if (response.IsSuccess)
             {
                 return NoContent();
             }
-            return BadRequest(response.Message);
+            else
+            {
+                return BadRequest(response.Message);
+            }
         }
         [HttpDelete("/api/product/{id}")]
         public ActionResult ArchiveProduct(int id)
