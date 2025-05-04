@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SolarCoffee.Services.Product;
+using SolarCoffee.Data.Models;
 
 namespace SolarCoffee.Web.Controllers
 {
@@ -15,11 +16,60 @@ namespace SolarCoffee.Web.Controllers
             _productService = productService;
         }
         [HttpGet("/api/product")]
-        public ActionResult GetProduct()
+        public ActionResult GetProduct([FromQuery] int? id)
         {
-            _logger.LogInformation("Getting all Products");
-            _productService.GetAllProducts();
-            return Ok("");
+            _logger.LogInformation("Getting Products");
+            if (id.HasValue)
+            {
+                var product = _productService.GetProductById(id.Value);
+                return Ok(product);
+            }
+
+            var products = _productService.GetAllProducts();
+            return Ok(products);
+        }
+        [HttpPost]
+        [Route("api/product")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
+        public ActionResult CreateProduct([FromBody] Product product)
+        {
+            _logger.LogInformation("Creating Product");
+            var response = _productService.CreateProduct(product);
+            if (response.IsSuccess)
+            {
+                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
+            }
+            return BadRequest(response.Message);
+        }
+
+
+
+        [HttpPut("/api/product/{id}")]
+        public ActionResult UpdateProduct(int id, [FromBody] Data.Models.Product product)
+        {
+            _logger.LogInformation("Updating Product");
+            if (id != product.Id)
+            {
+                return BadRequest("Product ID mismatch");
+            }
+            var response = _productService.CreateProduct(product);
+            if (response.IsSuccess)
+            {
+                return NoContent();
+            }
+            return BadRequest(response.Message);
+        }
+        [HttpDelete("/api/product/{id}")]
+        public ActionResult ArchiveProduct(int id)
+        {
+            _logger.LogInformation("Archiving Product");
+            var response = _productService.ArchiveProduct(id);
+            if (response.IsSuccess)
+            {
+                return NoContent();
+            }
+            return BadRequest(response.Message);
         }
     }
 }
