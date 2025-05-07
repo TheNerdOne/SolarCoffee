@@ -8,73 +8,119 @@ namespace SolarCoffee.Services.Product
     public class ProductService : IProductService
     {
         private SolarDbContext _context = new SolarDbContext();
-        public List<Data.Models.Product> GetAllProducts()
+        public ServiceResponse<List<Data.Models.Product>> GetAllProducts()
         {
             // Check if the database is empty
             if (_context.Products == null)
             {
                 throw new Exception("Database is not initialized");
             }
-            var products = _context.Products.ToList();
+            var products = _context.Products.Where(p => !p.IsArchived).ToList();
             if (products == null || products.Count == 0)
             {
                 throw new Exception("No products found");
             }
-            products = products.Where(p => !p.IsArchived).ToList();
-            return products;
+            return new ServiceResponse<List<Data.Models.Product>>
+            {
+                Data = products,
+                Message = "Products retrieved successfully",
+                IsSuccess = true,
+                Time = DateTime.UtcNow
+            };
         }
 
-        public Data.Models.Product GetProductById(int id)
+        public ServiceResponse<Data.Models.Product> GetProductById(int id)
         {
             var product = _context.Products.FirstOrDefault(p => p.Id == id);
             if (product == null)
             {
                 throw new Exception($"Product with id {id} not found");
             }
-            return product;
+            return new ServiceResponse<Data.Models.Product>
+            {
+                Data = product,
+                Message = "Product retrieved successfully",
+                IsSuccess = true,
+                Time = DateTime.UtcNow
+            };
         }
 
-        public ServiceResponse<bool> CreateProduct(Data.Models.Product product)
+        public ServiceResponse<Data.Models.Product> CreateProduct(Data.Models.Product product)
         {
-            try 
+            try
             {
                 product.CreatedOn = DateTime.UtcNow;
                 product.UpdatedOn = DateTime.UtcNow;
                 product.IsArchived = false;
-                
+
                 _context.Products.Add(product);
-                _context.SaveChanges();
-                
-                return new ServiceResponse<bool>
+
+                var newInventory = new Data.Models.ProductInventory
                 {
-                    Data = true,
-                    Message = $"Product created successfully with ID: {product.Id}"
+                    CreatedOn = DateTime.UtcNow,
+                    UpdatedOn = DateTime.UtcNow,
+                    Product = product,
+                    QuatityOnHand = 0,
+                    IdealQuantity = 10,
+                };
+                _context.ProductInventories.Add(newInventory);
+
+                _context.SaveChanges();
+
+                return new ServiceResponse<Data.Models.Product>
+                {
+                    Data = product,
+                    Time = DateTime.UtcNow,
+                    Message = $"Product created successfully",
+                    IsSuccess = true
                 };
             }
             catch (Exception ex)
             {
-                return new ServiceResponse<bool>
+                return new ServiceResponse<Data.Models.Product>
                 {
-                    Data = false,
+                    Data = product,
+                    IsSuccess = false,
                     Message = $"Error creating product: {ex.Message}"
                 };
             }
         }
 
-        public ServiceResponse<bool> ArchiveProduct(int id)
+        public ServiceResponse<Data.Models.Product> ArchiveProduct(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
-            if (product == null)
+            try
             {
-                throw new Exception($"Product with id {id} not found");
+                var product = _context.Products.FirstOrDefault(p => p.Id == id);
+                if (product == null)
+                {
+                    return new ServiceResponse<Data.Models.Product>
+                    {
+                        Data = null,
+                        Message = $"Product with {id} not found",
+                        IsSuccess = false,
+                        Time = DateTime.UtcNow
+                    };
+                }
+                product.IsArchived = true;
+                _context.SaveChanges();
+                return new ServiceResponse<Data.Models.Product>
+                {
+                    Data = product,
+                    Message = "Product archived successfully",
+                    IsSuccess = true,
+                    Time = DateTime.UtcNow
+                };
             }
-            product.IsArchived = true;
-            _context.SaveChanges();
-            return new ServiceResponse<bool>
+            catch (System.Exception e)
             {
-                Data = true,
-                Message = "Product archived successfully"
-            };
+                return new ServiceResponse<Data.Models.Product>
+                {
+                    Data = null,
+                    Message = $"error:{e}",
+                    IsSuccess = false,
+                    Time = DateTime.UtcNow
+                };
+            }
         }
         public ServiceResponse<bool> UpdateProduct(Data.Models.Product product)
         {
