@@ -16,6 +16,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<SolarDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("solar.dev")));
+    
+builder.Services.AddTransient<IProductService, ProductService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
