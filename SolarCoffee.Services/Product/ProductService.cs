@@ -36,13 +36,29 @@ namespace SolarCoffee.Services.Product
 
         public ServiceResponse<bool> CreateProduct(Data.Models.Product product)
         {
-            _context.Products.Add(product);
-            _context.SaveChanges();
-            return new ServiceResponse<bool>
+            try 
             {
-                Data = true,
-                Message = "Product created successfully"
-            };
+                product.CreatedOn = DateTime.UtcNow;
+                product.UpdatedOn = DateTime.UtcNow;
+                product.IsArchived = false;
+                
+                _context.Products.Add(product);
+                _context.SaveChanges();
+                
+                return new ServiceResponse<bool>
+                {
+                    Data = true,
+                    Message = $"Product created successfully with ID: {product.Id}"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Data = false,
+                    Message = $"Error creating product: {ex.Message}"
+                };
+            }
         }
 
         public ServiceResponse<bool> ArchiveProduct(int id)
