@@ -29,12 +29,16 @@ namespace SolarCoffee.Web.Controllers
             return Ok(products);
         }
         [HttpPost]
-        [Route("api/product")]
+        [Route("/api/product")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
         public ActionResult CreateProduct([FromBody] Product product)
         {
             _logger.LogInformation("Creating Product");
+            
+            // Clear any ID that might have been sent
+            product.Id = 0; // This ensures EF Core will generate a new ID
+            
             var response = _productService.CreateProduct(product);
             if (response.IsSuccess)
             {
@@ -42,9 +46,6 @@ namespace SolarCoffee.Web.Controllers
             }
             return BadRequest(response.Message);
         }
-
-
-
         [HttpPut("/api/product/{id}")]
         public ActionResult UpdateProduct(int id, [FromBody] Data.Models.Product product)
         {
