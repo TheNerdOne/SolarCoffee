@@ -15,7 +15,6 @@ export async function makeRequest<T>(
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Access-Control-Allow-Origin': '*'
             }
         })
         return response.data.data
