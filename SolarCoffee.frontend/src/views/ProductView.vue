@@ -4,7 +4,7 @@
         <!-- <img :src="product.imageUrl" alt="Product Image" /> -->
         <p>{{ product.description }}</p>
         <p>Price: {{ formatCurrency(product.price) }}</p>
-        <button @click="addToCart(product)">Add to Cart</button>
+        <button @click="handleAddToCart(product)">Add to Cart</button>
     </div>
 </template>
 <script setup lang="ts">
@@ -29,4 +29,7 @@ const productId = route.params.productId as string;
     product.value = await getProductById(productId);
  })
 
+function handleAddToCart(product) {
+  addToCart(product)
+}
 </script>
