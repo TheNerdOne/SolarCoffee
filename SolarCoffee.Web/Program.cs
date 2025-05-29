@@ -4,6 +4,18 @@ using SolarCoffee.Data;
 using SolarCoffee.Services.Product;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173") // Replace with your frontend URL
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
@@ -20,6 +32,7 @@ builder.Services.AddDbContext<SolarDbContext>(options =>
 builder.Services.AddTransient<IProductService, ProductService>();
 
 var app = builder.Build();
+app.UseCors("AllowFrontend");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
